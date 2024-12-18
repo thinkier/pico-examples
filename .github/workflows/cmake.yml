@@ -1,4 +1,4 @@
-name: CMake
+name: Build
 on: [push, pull_request]
 
 env:
@@ -7,8 +7,12 @@ env:
 
 jobs:
   build:
-    if: github.repository_owner == 'raspberrypi'
-    runs-on: [self-hosted, Linux, X64]
+    matrix:
+      board:
+        - pico_w
+        - pimoroni_pico_plus2_w_rp2350.h
+    env:
+      PICO_BOARD: ${{ matrix.board }}
 
     steps:
     - name: Clean workspace
@@ -58,3 +62,9 @@ jobs:
       shell: bash
       # Execute the build.  You can specify a specific target with "--target <NAME>"
       run: cmake --build . --config $BUILD_TYPE --parallel $(nproc)
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.board }}
+        path: '**/*.uf2'
