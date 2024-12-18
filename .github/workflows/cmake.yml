@@ -7,14 +7,21 @@ env:
 
 jobs:
   build:
-    matrix:
-      board:
-        - pico_w
-        - pimoroni_pico_plus2_w_rp2350.h
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        board:
+          - pico_w
+          - pimoroni_pico_plus2_w_rp2350
     env:
       PICO_BOARD: ${{ matrix.board }}
 
     steps:
+    - name: Fetch build dependencies
+      shell: bash
+      run: sudo apt-get update; sudo apt-get install --yes python3 git cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential libstdc++-arm-none-eabi-newlib; sudo rm -rf /var/apt/cache
+    
     - name: Clean workspace
       run: |
         echo "Cleaning up previous run"
@@ -30,7 +37,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: raspberrypi/pico-sdk
-        ref: develop
+        ref: master
         path: pico-sdk
 
     - name: Checkout pico-sdk submodules
